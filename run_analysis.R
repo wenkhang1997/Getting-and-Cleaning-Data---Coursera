@@ -44,15 +44,22 @@ write.table(final_data, file = paste("X_final.txt"), row.names = FALSE, col.name
 
 ## Create tidy data set with averages ------------------------------------------
 
-#rm(list = ls())
+rm(list = ls())
 dir.create("../tidy")
 setwd("../tidy")
 data <- read.table("../all/X_final.txt", header = TRUE)
-rows <- read.table("../all/y_final.txt")
-col_names <- read.table("../all/col_names.txt")
+activities <- read.table("../all/y_final.txt", colClasses = "character")
+col_names <- read.table("../all/col_names.txt", colClasses = "character")
+subjects <- read.table("../all/subject_all.txt")
+d <- cbind(subjects, activities, data)
+tidy_data <- NULL
+for (subject in 1:30) {
+    temp <- aggregate(d[subjects==subject,3:length(d)], by = list(activities[subjects==subject,]), FUN = mean)
+    tidy_data <- rbind(tidy_data, cbind(subject, temp))
+}
 
-tidy_data <- aggregate(data, by = rows, FUN = mean)
-write.table(tidy_data[, 2:length(tidy_data)], file = "tidy_data.txt", row.names = tidy_data[,1], col.names = col_names[,1])
+#tidy_data <- aggregate(data, by = rows, FUN = mean)
+write.table(tidy_data, file = "tidy_data.txt", row.names = FALSE, col.names = c("subject","activity",col_names[,1]))
 
 ## End -------------------------------------------------------------------------
 
